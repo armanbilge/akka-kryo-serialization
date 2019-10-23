@@ -18,6 +18,8 @@
 
 package io.altoo.akka.serialization.kryo
 
+import java.nio.ByteBuffer
+
 import akka.actor.ExtendedActorSystem
 import akka.event.Logging
 import akka.serialization._
@@ -69,7 +71,7 @@ private[kryo] class KryoSerializationSettings(val config: Config) {
     cfg.root.unwrapped.asScala.toMap.map { case (k, v) => (k, v.toString) }
 }
 
-class KryoSerializer(val system: ExtendedActorSystem) extends Serializer {
+class KryoSerializer(val system: ExtendedActorSystem) extends Serializer with ByteBufferSerializer {
 
   protected def configKey: String = "akka-kryo-serialization"
 
@@ -176,6 +178,9 @@ class KryoSerializer(val system: ExtendedActorSystem) extends Serializer {
       serializerPool.release(ser)
   }
 
+  override def toBinary(o: AnyRef, buf: ByteBuffer): Unit = ???
+
+  override def fromBinary(buf: ByteBuffer, manifest: String): AnyRef = ???
 
   private def getKryo(strategy: String, serializerType: String): Kryo = {
     val referenceResolver = if (settings.kryoReferenceMap) new MapReferenceResolver() else new ListReferenceResolver()

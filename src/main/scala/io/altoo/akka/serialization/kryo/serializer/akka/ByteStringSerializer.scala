@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,11 +23,6 @@ import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.{Kryo, Serializer}
 
 /**
- * *
- *
- * Generic serializer for traversable collections
- *
- * @author luben
  *
  */
 class ByteStringSerializer() extends Serializer[ByteString] {
@@ -40,7 +35,7 @@ class ByteStringSerializer() extends Serializer[ByteString] {
   override def write(kryo: Kryo, output: Output, obj: ByteString): Unit = {
     val len = obj.size
     output.writeInt(len, true)
-    obj.foreach { output.writeByte }
+    obj.foreach {output.writeByte}
   }
 }
 
