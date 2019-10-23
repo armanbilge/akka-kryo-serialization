@@ -152,7 +152,8 @@ class KryoSerializer(val system: ExtendedActorSystem) extends Serializer with By
     }
 
   // serializer pool to delegate actual serialization
-  private val serializerPool = new SerializerPool(queueBuilderClass.getDeclaredConstructor().newInstance(), () => new KryoSerializerBackend(getKryo(settings.idStrategy, settings.serializerType), settings.bufferSize, settings.maxBufferSize, settings.useManifests, settings.useUnsafe)(log))
+  //todo ugly pool withint the impl !!! get rid of that then change to contain [Serializer with ByteBufferSerializer]
+  private val serializerPool: SerializerPool = new SerializerPool(queueBuilderClass.getDeclaredConstructor().newInstance(), () => new KryoSerializerBackend(getKryo(settings.idStrategy, settings.serializerType), settings.bufferSize, settings.maxBufferSize, settings.useManifests, settings.useUnsafe)(log))
 
   // this is whether "fromBinary" requires a "clazz" or not
   override def includeManifest: Boolean = settings.useManifests
@@ -169,6 +170,18 @@ class KryoSerializer(val system: ExtendedActorSystem) extends Serializer with By
       serializerPool.release(ser)
   }
 
+  //todo replace with delegate to bytebuffer
+//  override def toBinary(o: AnyRef): Array[Byte] = {
+//    // in production code, acquire this from a BufferPool
+//    val buf = ByteBuffer.allocate(256)
+//
+//    toBinary(o, buf)
+//    buf.flip()
+//    val bytes = new Array[Byte](buf.remaining)
+//    buf.get(bytes)
+//    bytes
+//  }
+
   // delegate to a serializer backend
   override def fromBinary(bytes: Array[Byte], clazz: Option[Class[_]]): AnyRef = {
     val ser = serializerPool.fetch()
@@ -178,9 +191,15 @@ class KryoSerializer(val system: ExtendedActorSystem) extends Serializer with By
       serializerPool.release(ser)
   }
 
+  //todo replace with delegate to bytebuffer
+//  override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
+//    fromBinary(ByteBuffer.wrap(bytes), manifest)
+
   override def toBinary(o: AnyRef, buf: ByteBuffer): Unit = ???
+  //todo use com.esotericsoftware.kryo.io.ByteBufferOutput
 
   override def fromBinary(buf: ByteBuffer, manifest: String): AnyRef = ???
+  //todo use com.esotericsoftware.kryo.io.ByteBufferInput
 
   private def getKryo(strategy: String, serializerType: String): Kryo = {
     val referenceResolver = if (settings.kryoReferenceMap) new MapReferenceResolver() else new ListReferenceResolver()
